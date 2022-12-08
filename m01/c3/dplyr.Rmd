@@ -1,0 +1,232 @@
+---
+title: "Manejo avanzado de datos con dplyr"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# IEBS
+
+## Javier Cózar - jcozar87@gmail.com
+
+Aunque R es un lenguaje muy potente, muchos expertos en data science han diseñado herramientas que perferccionan las operaciones y flujos de trabajo más habituales para optimizar el rendimiendo en su dia a dia.
+
+Para gestionar dataframes de manera más eficiente y expresiva se ha desarrollado el paquete `dplyr` que nos proporciona una serie de herramientas de alto nivel para gestionar data frames
+
+Lo primero que haremos es instalar la librería para ello descomentar y ejecutar el siguiente codigo
+
+```{r}
+# install.packages("dplyr")
+```
+
+Una vez instalado el paquete podemos cargarlo en la sesión usando `library`
+
+```{r}
+library(dplyr)
+```
+
+Lo primero que vamos a hacer es cargar un dataset para poder probar la libreria
+
+```{r}
+df = read.csv("datos/Titanic.csv")
+```
+
+```{r}
+head(df)
+```
+
+### Muestreo
+
+El primero método que vamos a utilizar es `sample`, como alternativa a `head`, que nos permite obtener un subconjunto aleatorio de los datos.
+
+Este método viene con dos alternativas, `sample_n` obtiene una muestra de n elementos
+
+```{r}
+sample_n(df, 10)
+```
+
+Sample frac obtiene una muestra proporcional al tamaño del dataframe
+
+```{r}
+sample_frac(df, 0.01)
+```
+
+### Proyección
+
+El operador más básico de todos es la proyección, que nos permite obtener un subconjunto de columnas a partir del dataframe.
+
+```{r}
+df_projected <- select(df, Name, Age)
+sample_n(df_projected, 10)
+```
+
+Es importante destacar que en dplyr todos los operadores van a tener el mismo formato en el que primero pasamos el dataframe y luego los parámetros. Si se trata de nombres de columnas los pasaremos _sin comillas_.
+
+
+### Tuberias
+
+Uno de los mayores avanzes que proporciona dplyr es la posibilidad de mejorar la sintaxis de R utilizando tuberias.
+
+En el ejemplo anterior hemos tenido que guardar el resultado del `select` en una variable auxiliar y despues llamar a `sample`, si tuvieramos que hacerlo todo en una única operación no nos quedaría más remedio que anidar los métodos, algo que se acaba volviendo incómodo de escribir y leer
+
+```{r}
+sample_n(select(df, Name, Age), 10)
+```
+
+Para evitar esta sintaxis podemos utilizar un paquete llamado `magrittr` que nos proporciona un operador llamado tuberia o _pipe_, `%>%`
+
+Primero vamos a instalar y cargar este paquete
+
+```{r}
+# install.packages("magrittr")
+library(magrittr)
+```
+
+El operador de tuberia nos permite redirigir la salida de un método a otro omitiendo la necesidad de guardar y pasar el dataframe resultante.
+
+```{r}
+df %>% select(Name, Age)
+```
+
+
+De este modo resulta muy cómodo encadenar distintos métodos sin tener que anidarlos
+
+```{r}
+df %>% select(Name, Age) %>% sample_n(10)
+```
+
+Una forma habitual de escribirlo es incluir cada método en una línea diferente
+
+```{r}
+df %>% 
+  select(Name, Age) %>% 
+  sample_n(10)
+```
+
+### Proyección
+
+Volviendo a la proyección, podemos proyectar en negativo, es decir, especificando que columnas queremos eliminar.
+
+```{r}
+df %>% 
+  select(-Name) %>% 
+  sample_n(10)
+```
+
+### Filtrado 
+
+Otra operación muy común a realizar sobre un dataframe es el filtrado de filas. Para ello utilizaremos `filter` junto a una operación booleana
+
+```{r}
+df %>% 
+  filter(Age < 30) %>%
+  sample_n(10)
+```
+
+Podemos filtrar también por varias columnas, para ello es mejor separar las condiciones por comas
+
+```{r}
+df %>% 
+  filter(Age < 30, Survived == 1) %>%
+  sample_n(10)
+```
+
+# Ordenación
+
+Podemos utilizar `arrange` para determinar la ordenación de las filas por una variable concreta. Importante aquí no utilizar sample ya que aleatorizaremos de nuevo el orden
+
+```{r}
+df %>%
+  arrange(Age) %>%
+  head(10)
+```
+
+Podemos ordenar por orden creciente utilizando el oeprador `-`
+
+```{r}
+df %>%
+  arrange(-Age) %>%
+  head(10)
+
+```
+
+### Eliminación de duplicados
+
+Podemos eliminar filas duplicadas con `distinct`, especialmente útil cuando se han filtrado algunas columnas y queremos ver los valores únicos para una variable o conjunto de ellas.
+
+```{r}
+df %>% 
+  select(PClass) %>% 
+  distinct()
+```
+
+### Creación de nuevas columnas
+
+Podemos crear nuevas columnas con el operador `mutate`, a este operador le pasaremos expresiones de asignación, donde la parte izquierda será el nombre de la nueva columna a crear y la derecha el valor a asignarle. Lo habitual es crear una columna a partir de una operación sobre otra.
+
+```{r}
+df %>% 
+  mutate(AgeRel = Age / 100) %>%
+  sample_n(10)
+```
+
+### Agregación
+
+Otra operación fundamental cuando trabajamos con dataframes es la agregación de datos. Para ello utilizaremos `summarise`, que nos permite definir nuevas variables en función de operadores de agregación sobre columnas del dataframe.
+
+Como operaciones de agregación tenemos la suma, media, desviación estándar... (`sum`, `mean`, `sd`...)
+
+
+```{r}
+df %>%
+  summarise(
+    avg_age=mean(Age, na.rm=TRUE) # Importante el na.rm para que ignore posibles valores perdidos
+  )
+```
+
+### Agrupación
+
+La agregación suele alcanzar su máximo potencial cuando somos capaces de agregar en base a grupos formados por valores comunes en nuestros datos. Podemos agrupar por un conjunto de columnas utilizando `group_by`. Una vez agrupados los datos, cualquier operación de agregación se ejecutará sobre los distintos grupos.
+
+```{r}
+df %>%
+  group_by(Sex) %>%
+  summarise(
+    avg_age=mean(Age, na.rm=TRUE)
+  )
+```
+
+
+Por ejemplo, sobre el dataset Titanic, vamos a agrupar por género `Sex` y a calcular la suma de los supervientes
+
+```{r}
+df %>%
+  group_by(Sex) %>%
+  summarise(
+    sum_survived=sum(Survived)
+  )
+```
+
+Parece que sobrevivieron muchas más mujeres que hombres, pero, ¿cuál es el porcentaje de supervivencia para cada género?. Vamos a calcularlo computando el número de filas para cada grupo com la función de agregación de conteo `n()`
+
+```{r}
+df %>%
+  group_by(Sex) %>%
+  summarise(
+    total = n(),
+    sum_survived=sum(Survived)
+  )
+```
+
+Vemos que efectivamente el ratio de supervivencia de las mujeres fue mucho más alto. Para poder contrastar este dato de una manera más visual vamos a computar el ratio. Para ello utilizaremos `mutate` para crear una columna que sea el numero de supervivientes entre el total
+
+```{r}
+df %>%
+  group_by(Sex) %>%
+  summarise(
+    total = n(),
+    sum_survived=sum(Survived)
+  ) %>%
+  mutate(prop_survived=sum_survived/total)
+```
+

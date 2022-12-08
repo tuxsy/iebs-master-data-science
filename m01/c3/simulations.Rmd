@@ -1,0 +1,244 @@
+---
+title: "Simulación y visualización"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# IEBS
+
+## Javier Cózar - jcozar87@gmail.com
+
+Una de las herramientas más potentes de R es su motor de generación simulación de datos y la visualización.
+
+R pone a nuestra disposición generadores de datos aleatorios para la mayoría de distribuciones relevantes que se utilizan habitualmente en estadística.
+
+Una de las funciones más comúnes el generador de datos, que nos permite obtener muestras a partir de una distribución parametrizada.
+
+
+## Distribución normal
+
+La primera distribución que vamos a ver es la distribución normal. La función `rnorm` nos permite obtener datos a partir de una gaussiana definiendo sus parámetros de media y desviación. El primer parámetro es el tamaño de la muestra a obtener.
+
+El siguiente ejemplo obtiene una muestra de 10 elementos para una distribución de media 0 y desviación 0.1
+
+
+```{r}
+gaussian_data <- rnorm(10, mean = 0, sd = 0.1)
+gaussian_data
+```
+
+Una muestra de 10 elementos no es significativa, por lo que si intentamos recuperar los estadísiticos de media y desviación vamos a observar muy poca precisión.
+
+```{r}
+mean(gaussian_data)
+sd(gaussian_data)
+```
+
+Con una muestra mayor, por ejemplo 100, la precisión aumentará
+
+```{r}
+gaussian_data <- rnorm(100, mean = 0, sd = 0.1)
+mean(gaussian_data)
+sd(gaussian_data)
+```
+
+
+## Histogramas
+
+Otra manera de comprobar gráficos que mayor información aporta sobre una distribución de datos univariada. En R es tan sencillo como utilizar la función `hist()`
+
+
+```{r}
+gaussian_data <- rnorm(10, 1, sd = 0.1)
+hist(gaussian_data)
+```
+
+Obviamente la distribución de 10 valores no nos ofrece la vista de "campana" tan característica de una distribución gaussiana. Para poder tener más precisión vamos a ir aumentando la muestra en un factor de 10, y veremos como va tomando forma.
+
+```{r}
+gaussian_data <- rnorm(100, 1, sd = 0.1)
+hist(gaussian_data)
+```
+
+```{r}
+gaussian_data <- rnorm(1000, 1, sd = 0.1)
+hist(gaussian_data)
+```
+
+
+## Scatterplots
+
+Otro gráfico habitual es el gráfico de nube de puntos o scatter, en este gráfico podemos disponer los valores de una o más variables sobre ejes de coordinadas.
+
+Si utilizamos un scatterplot de una única variable obtendremos una nube en la que la variable se ecuentra en el eje y el eje x es el índice ordenado de todos los valores.
+
+```{r}
+plot(gaussian_data)
+```
+
+## Distribución uniforme
+
+Otra distribución muy habitual es la distribución uniforme, en la que simplemente distribuimos valores con la misma probabilidad entre dos puntos. En el siguiente ejemplo obtendremos números aleatorios entre 0 y 1.
+
+```{r}
+uniform_data <- runif(10, 0, 1)
+uniform_data
+```
+
+Si visualizamos esta distribución deberiamos tener un histograma plano
+
+
+```{r}
+uniform_data <- runif(10, 0, 1)
+hist(uniform_data)
+```
+
+```{r}
+uniform_data <- runif(100, 0, 1)
+hist(uniform_data)
+```
+
+```{r}
+uniform_data <- runif(1000, 0, 1)
+hist(uniform_data)
+```
+
+## Correlación
+
+Si visualizamos dos variables aleatorias sobre un scatterplot obtendremos una nube de puntos aleatoria
+
+```{r}
+gaussian_data <- rnorm(100, 1, sd = 0.1)
+uniform_data <- runif(100, 0, 1)
+
+plot(gaussian_data, uniform_data)
+```
+
+Sin embargo, si visualizamos una variable consigo misma, obtendremos una recta perfecta
+
+```{r}
+plot(gaussian_data, gaussian_data)
+```
+
+
+
+Estas visualizaciones nos dan una perspectiva de la correlación. Una interpretación de la correlación lineal es que una variable pueda expresarse como una combinación lineal de otra. En R podemos calcular la correlación con `cor`. Por ejemplo la correlación de una variable consigo misma es de 1, porque se puede expresar como la combinación lineal `x * 1`
+
+```{r}
+cor(gaussian_data, gaussian_data)
+```
+
+Mientras que la correlación de dos variables independientes debería ser cercana a 0
+
+```{r}
+cor(uniform_data, gaussian_data)
+```
+
+Vamos a calcular una variable que sea una combinación lineal de nuestros datos gaussianos
+
+```{r}
+gaussian_lineal_data <- gaussian_data * 10
+```
+
+Si visualizamos esta relación y medimos la correlación encontraremos una recta y un valor de 1, ya que la relación lineal es perfecta
+
+```{r}
+plot(gaussian_data, gaussian_lineal_data)
+```
+
+
+```{r}
+cor(gaussian_data, gaussian_lineal_data)
+```
+
+Si la relación es lineal pero negativa, el gráfico y la correlación serán inversos
+
+```{r}
+gaussian_lineal_data <- gaussian_data * -10
+```
+
+```{r}
+plot(gaussian_data, gaussian_lineal_data)
+```
+
+```{r}
+cor(gaussian_data, gaussian_lineal_data)
+```
+
+
+Vamos a computar una variable ruidosa que sea una combinación lineal de nuestra variable gaussiana a la que añadiremos ruido, para el ruido utilizaremos valores de una variable uniforme. Por el momento, obtendremos valores entre 0 y 0.1.
+
+```{r}
+uniform_data <- runif(100, 0, 0.1)
+noisy_data <- gaussian_data + uniform_data
+```
+
+Podemos ver que el gráfico tiene forma de recta pero presenta variaciones por culpa del ruido.
+
+```{r}
+plot(gaussian_data, noisy_data)
+```
+
+La correlación sigue siendo cercana a 1 porque la relación lineal esta clara
+
+```{r}
+cor(gaussian_data, noisy_data)
+```
+
+Probemos ahora con una relación con más ruido
+
+```{r}
+uniform_data <- runif(100, 0, 0.5)
+noisy_data <- gaussian_data + uniform_data
+```
+
+```{r}
+plot(gaussian_data, noisy_data)
+```
+
+```{r}
+cor(gaussian_data, noisy_data)
+```
+
+Ahora la relación lineal se ve mucho menos, y la correlación es mucho más tímida, por lo que la aleatoriedad está eliminado gran parte de la relación lineal.
+
+## Dataframes
+
+Podemos definir un dataframe a partir de datos sintéticos. Por ejemplo la variable `outdoors` va a representar la medición de un termómetro en el exterior
+
+```{r}
+outdoors <- rnorm(100, 10, 5)
+```
+
+```{r}
+df <- data.frame(outdoors=outdoors)
+```
+
+```{r}
+head(df)
+```
+
+Ahora vamos a crear una variable indoors que represente la temperatura en el interior de un edificio. Esta será siempre 10 grados mayor que en el exterior, pudiendo variar una media de 2 grados con una desviación de 1 grado. Para modelar este fenómemo utilizaremos una variable gaussiana
+
+```{r}
+df$indoors = outdoors + 10 + rnorm(100, 0, 1)
+```
+
+
+```{r}
+head(df)
+```
+
+Podemos obtener la matriz de correlación para un dataframe usando la misma función que antes
+
+```{r}
+cor(df)
+```
+
+
+También podemos obtener una combinación de gráficos comparando todas las variables utilizando `plot` sobre el dataframe
+
+```{r}
+plot(df)
+```

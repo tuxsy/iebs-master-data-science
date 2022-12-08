@@ -1,0 +1,543 @@
+---
+title: "Introducción a R"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# IEBS
+
+## Javier Cózar - jcozar87@gmail.com
+
+### Variables y Expresiones en R
+
+Los elementos más básicos con los que trabajaremos en R son variables y tipos primitivos. Para poder asignar un valor a una variable utilizaremos el operador `<-`. Éste es el caso más común y el que utilizan la mayoría de programadores en R, aunque también está disponible el operador `=`.
+
+```{r}
+a <- 1
+a
+```
+
+Podemos mostrar cualquier resultado en la consola utilizando la función _built-in_ `print`
+
+```{r}
+print(a)
+```
+
+Una vez hemos creado variables, podemos definir expresiones más complejas. Entre las más directas encontramos los distintos operadores aritméticos
+
+```{r}
+suma <- 1+2
+resta <- 5-3
+multiplicacion <- 2*3
+division <- 1/3
+modulo <- 4%%2
+potencia <- 2^3
+
+print(suma)
+print(resta)
+print(multiplicacion)
+print(division)
+print(potencia)
+```
+
+Hasta ahora solo hemos trabajado con valores numéricos, pero R permitie utilizar más tipos de variables a conveniencia
+
+```{r}
+numero <- 1
+flotante <- 1.1
+booleano <- TRUE
+string <- "Hello"
+```
+
+Para determinar el tipo de una variable utilizaremos la función `class`
+
+```{r}
+class(numero)
+```
+
+En R tenemos otros operadores además de los aritméticos. Por ejemplo, los operadores lógicos comparan dos valores y obtienen como salida un booleano.
+
+```{r}
+x <- 10
+
+x < 20
+x > 5
+x < 20 & x > 5
+x==2 | x > 1
+x==1 | x==12
+(10==1)
+!(10==1)
+```
+
+
+## Vectores
+
+Por el momento hemos trabajado con valores literales únicamente. No obstante, para poder implementar la mayoría de procesos y algoritmos vamos a necesitar estructuras de datos que nos permitan almacenar y procesar colecciones de valores.
+
+La más básica de todas es el array, para crear un array en R utilizamos la función `c()` a la que le pasaremos los valores separados por comas.
+
+```{r}
+numeros <- c(1,2,3,4)
+numeros
+```
+
+Podemos comprobar el tipo de del array con `class` como si se tratase de un valor individual
+
+```{r}
+class(numeros)
+```
+
+Es importante ver que este tipo no hace referencia a que es una variable del tipo array, sino que simplemente nos devuelve el tipo interno.
+
+Podemos crear arrays a partir de otras variables
+
+```{r}
+cadenas <- c("Uno", "Dos", "tres")
+class(cadenas)
+```
+
+Un array solo puede tener elementos de un mismo tipo. Observad que ocurre si intento mezclar arrays de distinto tipo:
+
+```{r}
+mixto <- c(1,"dos")
+mixto
+```
+
+```{r}
+class(mixto)
+```
+
+Como podemos observar, el array ha convertido ambos valores al tipo más general, en este caso el tipo `character`, ya que con una cadena podemos también especificar números. Este proceso se denomina __coerción__ y es importante tenerlo en cuenta ya que podemos perder información.
+
+En R podemos añadir nombres a los distintos elementos de un array. Esto es muy útil para identificar datos, por ejemplo, vamos a crear un array que contenga valores del 1 al 7 y vamos a indentificarlos con los nombres de los días de la semana. Para ello utilizaremos la función ´names´
+
+```{r}
+labels <- c('Mon','Tue','Wed','Thu','Fri','Sat','Sun')
+days <- c(1,2,3,4,5,6,7)
+
+names(days) <- labels
+```
+
+```{r}
+days
+```
+
+Podemos observar que ahora nuestro array se imprime con los nombres que acabamos de aportar.
+
+#### Operaciones sobre arrays
+
+Una vez que hemos aprendido a definir arrays, podemos aprender algunas operaciones básicas sobre los mismos. 
+
+Vamos a crear dos arrays sobre los que probar las operaciones que vayamos introduciendo.
+
+```{r}
+numeros <- c(100,200,300)
+cadenas <- c('a','b','c')
+
+numeros
+cadenas
+```
+
+Una de las más utilizadas es obtener la cantidad de elementos que componen un array. Para ello utilizaremos `length`.
+
+```{r}
+length(numeros)
+```
+
+#### Indexación
+
+Quizás la operación más común en un array es la __indexación__, que aplicamos para acceder a valores individuales del array. Para ello utilizaremos el operador de corchetes `[]`
+
+```{r}
+numeros[1]
+numeros[2]
+
+cadenas[1]
+cadenas[2]
+```
+
+> __Es muy importante tener el cuenta que en R a diferencia de la mayoría de lenguajes, los índices de un vector empiezan desde el 1 y no desde el 0__
+
+Acceder al índice 0 no dará error pero no devolverá ningún valor válido.
+
+```{r}
+numeros[0]
+```
+
+También es fundamental tener en cuenta que si intentamos acceder a un valor fuera del rango no obtendremos un error pero si un valor vacío o `NA`. Este valor representa la ausencia de información y puede derivar en otros errores de cómputo posteriores si lo arrastramos durante nuestro programa.
+
+```{r}
+numeros[7]
+```
+
+En R es posible indexar un array utilizando otro array en el que indiquemos los índices a los que queramos acceder
+
+```{r}
+numeros[c(1,3)]
+```
+
+Esta sintaxis puede utilizarse para filtrar los elementos e incluso para cambiarles el orden
+
+```{r}
+numeros[c(3, 1)]
+```
+
+Otra opción es indexar el array mediante una máscara booleana, es decir, un array del mismo tamaño que contenga valores `TRUE` o `FALSE`. De este modo solo obtenedremos aquellos con valor positivo.
+
+```{r}
+cadenas[c(TRUE, TRUE, FALSE)]
+```
+
+También es posible acceder al array utilizando rangos, los rangos los delimitaremos con el operador `:` indicando el principio y el final de la secuencia que queremos obtener. El final no se incluye en el rango.
+
+```{r}
+v <- c(1,2,3,4,5,6,7,8,9,10)
+
+v[2:4]
+```
+
+Por último, existe la posibilidad de acceder a un vector con nombres por el nombre del elemento. Para ellos indexaremos el array utilizando como valor la cadena con el nombre deseado
+
+```{r}
+days["Wed"]
+days["Sat"]
+```
+
+#### Vectorización
+
+Una de las propiedades más potentes de R es la posibilidad de realizar operaciones vectorizadas sobre un array. Para ello simplemente podemos operar aritmética o lógicamente sobre una array combinándolo con un valor escalar o con otro array.
+
+Por ejemplo, podemos aplicar operadores aritméticos con valores escalares que operararán sobre cada elemento del vector
+
+```{r}
+numeros + 1000
+numeros * 2
+```
+
+También podemos aplicar operadores lógicos que aplicarán la condición sobre cada elemento del vector, devolviendo un vector de valores booleanos
+
+```{r}
+numeros > 200
+```
+
+Este vector de booleanos suele utilizarse como máscara para filtrar los valores del array por una condición determinada
+
+```{r}
+numeros[numeros > 200]
+```
+
+También podemos realizar operaciones sobre vectores. Hemos de tener en consideración el tamaño de los vectores, ya que la mayoría de operaciones se efectúan elemento a elemento
+
+Por ejemplo podemos aplicar operaciones aritméticas sobre dos vectores del mismo tamaño
+
+```{r}
+v1 <- c(1,2,3)
+v2 <- c(5,6,7)
+```
+
+```{r}
+v1 + v2
+v1 - v2
+v1 * v2
+v1 / v2
+```
+
+Existen otras operaciones a nuestra disposición en el lenguaje para operar con vectores como por ejemplo las funciones estadísticas o para calcular sumatorios o máximos a partir del vector 
+
+```{r}
+sum(v1)  # Suma del vector
+sd(v1)   # Desviacion estandar
+var(v1)  # Varianza
+max(v1)  # Maximo
+min(v1)  # Minimo
+prod(v1) # Productorio
+```
+
+## Estructuras de control
+
+Hasta ahora hemos ejecutado operaciones individuales, pero a la hora de programar procedimientos más complejos y algoritmos vamos a necesitar ejecutar flujos de programas más complejos. Para ello tenemos a nuestra disposición las estructuras de control.
+
+### Condicional
+
+El operador condicional en R o `if` nos permite ramificar nuestro programa en dos en función de una condición. Por ejemplo, el siguiente código modifica una variable en función del valor de otra
+
+```{r}
+hot <- FALSE
+temp <- 25
+
+if (temp > 30){
+    hot <- TRUE
+}
+
+hot
+```
+
+En este caso solo ejecutaremos el cuerpo de la condición si el resultado de la comparación es positivo. Probemos a cambiar el valor de la variable `temp` para comprobar el nuevo resultado.
+
+En muchos casos queremos ejecutar condicionalmente dos caminos distintos, para ello se puede incluir una alternativa dentro de la condición con `else`
+
+```{r}
+temp <- 30
+
+if (temp > 30){
+    print("Que calor hace!")
+} else{
+    print("Se esta bien fuera!")
+}
+```
+
+De nuevo, probemos a cambiar el valor de la variable `temp` para ver el resultado modificado.
+
+
+### Iteración
+
+En ocasiones necesitaremos ejecutar el mismo código un número de veces determinado, para ello utilizaremos estructuras de iteración. La más sencilla es `while`, que ejecuta una serie de intstrucciónes mientras se cumpla una condición.
+
+En el siguiente bucle, vamos a iterar sobre el valor de la variable `x`, que iremos incrementando para que lleguemos a un punto en el que la condición deje de cumplirse y finalize. Cuidado, ya que si no garantizamos el fin del bucle nuestro programa será infinito.
+
+```{r}
+x = 0
+while(x < 10){
+    print(x)
+    x <- x+1
+}
+```
+
+Si queremos mejorar la salida del programa podemos formatear el mensaje que ponemos en `print` utilizando formateo de cadenas. Para ello podemos usar la función `paste` que nos permite concatenar cadenas.
+
+```{r}
+x <- 1
+paste("x es", x)
+```
+
+```{r}
+x = 0
+while(x < 10){
+    print(paste("x es", x))
+    x <- x+1
+}
+```
+
+Por último, vamos a ver otra forma de iterar, en este caso sobre los elementos de un vector. En ocasiones necesitaremos iterar directamente sobre los elementos de un vector, aunque podríamos hacerlo directamente con un bucle `while`, disponemos de una herramienta más apropiada, el bucle `for`. Este bucle nos permite iterar sobre los elementos de un array definiendo una variable auxiliar que tomará los distintos valores del array. Para ello utilizaremos el operador `in`
+
+```{r}
+vec <- c(1,2,3,4,5)
+
+for (i in vec){
+    print(paste("i es ", i))
+}
+```
+
+
+## Funciones
+
+También es habitual definir fragmentos de código a modo de funciones para poder encapsular nuestro código
+
+```{r}
+echo <- function(x) {
+  print(x)
+}
+```
+
+```{r}
+echo(1)
+```
+
+Podemos hacer que las funciones devuelvan valores simplemente incluyendo una expresión como su ultima linea
+
+```{r}
+suma_uno <- function(x) {
+  x + 1
+}
+```
+
+```{r}
+suma_uno(1)
+```
+
+```{r}
+inc = suma_uno(1)
+inc
+```
+
+## Factores
+
+Hemos visto como almacenar y operar con datos básicos, no obstante, en estadística y en análisis de datos queremos trabajar con valores que representen variables o conjuntos de datos. Un tipo de variable muy común son las variables _categóricas_, es decir, variables cuyo dominio esta compuesto por una serie de valores discretos.
+
+R proporciona una implementación cómoda y eficiente de este tipo de variables llamada factor.
+
+Para crear un factor utilizaremos el operador `factor`
+
+```{r}
+f <- factor(c("a", "b", "a", "b", "c"))
+f
+```
+
+Podemos comprobar el dominio del factor usando `levels` 
+
+```{r}
+levels(f)
+```
+
+Internamente, es posible acceder a los elementos internos de la colección
+
+```{r}
+f[1]
+f[2]
+```
+
+Por último, R nos permite calcular una serie de valores estadísticos sobre la variable en cuestion con `summary`
+
+```{r}
+summary(f)
+```
+
+También podemos convertir el factor a una coleccion de valores numéricos (los identificadores de sus niveles) o a los valores de los niveles como cadenas de texto. Esto destruye la información del factor
+
+```{r}
+as.numeric(f)
+```
+
+```{r}
+as.character(f)
+```
+
+
+## DataFrames
+
+Probablemente, la herramienta más potente que tenemos en R es el DataFrame. Esta estructura de datos tabular permite representar dominios de datos formados por una o más variables, columnas, sobre las que tenemos uno o varios casos, filas.
+
+Para continuar vamos a generar un pequeño dataset sintético a partir de unos pocos datos climátologicos.
+
+```{r}
+# Definimos las variables
+days <- c('mon','tue','wed','thu','fri')
+temp <- c(22.2,21,23,24.3,25)
+rain <- c(TRUE, TRUE, FALSE, FALSE, TRUE)
+
+# configuramos un dataframe a partir de los vectores
+df <- data.frame(days,temp,rain)
+df
+```
+
+### Indexación
+
+Podemos indexar un dataframe como con cualquier otra colección. Es importante destacar que en este caso tenemos que indexar tanto filas como columnas. Para ello separaremos cada índice con el operador `,`
+
+La parte de la izquierda determina las filas, y la de la derecha las columnas.
+
+```{r}
+df[1,1]
+```
+
+Podemos dejar cualquiera de ellos en blanco para obtener la fila/columna completas
+
+```{r}
+df[1,]
+```
+
+```{r}
+df[,1]
+```
+
+También podemos acceder por rangos
+
+```{r}
+df[1:3,]
+```
+
+```{r}
+df[,1:2]
+```
+
+O, en el caso de las columnas por nombre
+
+```{r}
+df[,'rain']
+
+```
+
+Es habitual combinar cualquiera de estos patrones de acceso
+
+```{r}
+df[1:5, c('days','temp')]
+```
+
+Por ultimo vemos que es posible acceder a las columnas directamente desde el dataframe con el operador `$`
+
+```{r}
+df$rain
+```
+
+# Operaciones sobre columnas
+
+También es posible indexar mediante máscaras booleanas, por ejemplo, podemos aprovechar la columna rain, que es booleana, para filtrar el dataframe por los dias en los que ha llovido
+
+```{r}
+df[df$rain, ]
+```
+
+Las columnas de un dataframe actual como vectores a la hora de efectuar operaciones vectorizadas
+
+```{r}
+df$temp * 2
+```
+
+
+El operador `$` suele aprovecharse para crear nuevas columnas en el dataframe. Simplemente asignar el valor de un vector que coincida en número de filas a una columna que puede incluso no existir
+
+```{r}
+df$test <- df$temp * 2
+```
+
+```{r}
+df
+```
+
+# Carga de datos y operaciones
+
+R proporciona una serie de datos de prueba internamente a los que podemos acceder mediante `data`. Concretamente vamos a cargar `mtcars` que es una colección de datos sobre motores de vehículos.
+
+
+```{r}
+data(mtcars)
+```
+
+```{r}
+class(mtcars)
+```
+
+```{r}
+mtcars
+```
+
+Vemos que la representación que tenemos es tabular, lo que permite una exploración visual cómoda de los datos. si nuestro dataframe es demasiado grande podemos acceder a un subconjunto mediante la operación `head`
+
+```{r}
+head(mtcars)
+```
+
+Podemos obtener diversos valores sobre el tamaño del dataframe, como su numero de filas y de columnas
+
+```{r}
+length(mtcars)
+nrow(mtcars)
+ncol(mtcars)
+```
+
+También podemos acceder a una colección de valores de estadística descriptiva mediante el operador `summary`
+
+```{r}
+summary(mtcars)
+```
+
+
+Lo más habitual es leer datos desde un fichero para lo que podemos usar la función `read`, el formato de datos más común es CSV
+
+```{r}
+df <- read.csv('datos/Titanic.csv')
+head(df)
+```
+
+
