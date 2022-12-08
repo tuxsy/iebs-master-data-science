@@ -1,8 +1,13 @@
 ---
 title: "Simulación y visualización"
 output:
-  pdf_document: default
+  html_document:
+    df_print: paged
   html_notebook: default
+  pdf_document: default
+  
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "output") })
 ---
 
 # IEBS

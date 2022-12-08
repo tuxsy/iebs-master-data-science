@@ -3,6 +3,8 @@ title: "Manejo avanzado de datos con dplyr"
 output:
   pdf_document: default
   html_notebook: default
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "output") })
 ---
 
 # IEBS
@@ -28,7 +30,7 @@ library(dplyr)
 Lo primero que vamos a hacer es cargar un dataset para poder probar la libreria
 
 ```{r}
-df = read.csv("datos/Titanic.csv")
+df = read.csv("Titanic.csv")
 ```
 
 ```{r}
