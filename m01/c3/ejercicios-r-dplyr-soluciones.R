@@ -5,7 +5,7 @@
 # -------------------------
 # Carga el dataset Salaries.csv
 
-df <- read.csv("datos/Salaries.csv")
+df <- read.csv("Salaries.csv")
 
 # -------------------------
 # Importa dplyr y magrittr

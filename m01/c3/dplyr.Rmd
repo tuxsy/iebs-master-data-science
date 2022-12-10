@@ -7,9 +7,16 @@ knit: (function(inputFile, encoding) {
   rmarkdown::render(inputFile, encoding = encoding, output_dir = "output") })
 ---
 
+```{r, include=F}
+# Clear envrironment
+rm(list=ls())
+# Clear console and plots
+cat("\f")
+```
+
 # IEBS
 
-## Javier Cózar - jcozar87@gmail.com
+## Javier Cózar - [jcozar87\@gmail.com](mailto:jcozar87@gmail.com){.email}
 
 Aunque R es un lenguaje muy potente, muchos expertos en data science han diseñado herramientas que perferccionan las operaciones y flujos de trabajo más habituales para optimizar el rendimiendo en su dia a dia.
 
@@ -17,7 +24,7 @@ Para gestionar dataframes de manera más eficiente y expresiva se ha desarrollad
 
 Lo primero que haremos es instalar la librería para ello descomentar y ejecutar el siguiente codigo
 
-```{r}
+```{r, include=FALSE}
 # install.packages("dplyr")
 ```
 
@@ -44,6 +51,8 @@ El primero método que vamos a utilizar es `sample`, como alternativa a `head`, 
 Este método viene con dos alternativas, `sample_n` obtiene una muestra de n elementos
 
 ```{r}
+
+?sample_n        
 sample_n(df, 10)
 ```
 
@@ -62,8 +71,7 @@ df_projected <- select(df, Name, Age)
 sample_n(df_projected, 10)
 ```
 
-Es importante destacar que en dplyr todos los operadores van a tener el mismo formato en el que primero pasamos el dataframe y luego los parámetros. Si se trata de nombres de columnas los pasaremos _sin comillas_.
-
+Es importante destacar que en dplyr todos los operadores van a tener el mismo formato en el que primero pasamos el dataframe y luego los parámetros. Si se trata de nombres de columnas los pasaremos *sin comillas*.
 
 ### Tuberias
 
@@ -75,7 +83,7 @@ En el ejemplo anterior hemos tenido que guardar el resultado del `select` en una
 sample_n(select(df, Name, Age), 10)
 ```
 
-Para evitar esta sintaxis podemos utilizar un paquete llamado `magrittr` que nos proporciona un operador llamado tuberia o _pipe_, `%>%`
+Para evitar esta sintaxis podemos utilizar un paquete llamado `magrittr` que nos proporciona un operador llamado tuberia o *pipe*, `%>%`
 
 Primero vamos a instalar y cargar este paquete
 
@@ -89,7 +97,6 @@ El operador de tuberia nos permite redirigir la salida de un método a otro omit
 ```{r}
 df %>% select(Name, Age)
 ```
-
 
 De este modo resulta muy cómodo encadenar distintos métodos sin tener que anidarlos
 
@@ -115,7 +122,7 @@ df %>%
   sample_n(10)
 ```
 
-### Filtrado 
+### Filtrado
 
 Otra operación muy común a realizar sobre un dataframe es el filtrado de filas. Para ello utilizaremos `filter` junto a una operación booleana
 
@@ -168,7 +175,7 @@ Podemos crear nuevas columnas con el operador `mutate`, a este operador le pasar
 
 ```{r}
 df %>% 
-  mutate(AgeRel = Age / 100) %>%
+  mutate(AgeRel = Age / 100, dob = 1912 - Age) %>%
   sample_n(10)
 ```
 
@@ -177,7 +184,6 @@ df %>%
 Otra operación fundamental cuando trabajamos con dataframes es la agregación de datos. Para ello utilizaremos `summarise`, que nos permite definir nuevas variables en función de operadores de agregación sobre columnas del dataframe.
 
 Como operaciones de agregación tenemos la suma, media, desviación estándar... (`sum`, `mean`, `sd`...)
-
 
 ```{r}
 df %>%
@@ -198,7 +204,6 @@ df %>%
   )
 ```
 
-
 Por ejemplo, sobre el dataset Titanic, vamos a agrupar por género `Sex` y a calcular la suma de los supervientes
 
 ```{r}
@@ -206,7 +211,7 @@ df %>%
   group_by(Sex) %>%
   summarise(
     sum_survived=sum(Survived)
-  )
+  ) 
 ```
 
 Parece que sobrevivieron muchas más mujeres que hombres, pero, ¿cuál es el porcentaje de supervivencia para cada género?. Vamos a calcularlo computando el número de filas para cada grupo com la función de agregación de conteo `n()`
@@ -224,11 +229,10 @@ Vemos que efectivamente el ratio de supervivencia de las mujeres fue mucho más 
 
 ```{r}
 df %>%
-  group_by(Sex) %>%
+  group_by(Sex, PClass) %>%
   summarise(
     total = n(),
     sum_survived=sum(Survived)
   ) %>%
   mutate(prop_survived=sum_survived/total)
 ```
-

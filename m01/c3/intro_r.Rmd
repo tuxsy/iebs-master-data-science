@@ -8,6 +8,10 @@ knit: (function(inputFile, encoding) {
   rmarkdown::render(inputFile, encoding = encoding, output_dir = "output") })
 ---
 
+```{r, include=FALSE}
+rm(list = ls())
+```
+
 # IEBS
 
 ## Javier Cózar - jcozar87@gmail.com
@@ -124,6 +128,10 @@ names(days) <- labels
 
 ```{r}
 days
+```
+
+```{r}
+days["Mon"]
 ```
 
 Podemos observar que ahora nuestro array se imprime con los nombres que acabamos de aportar.
@@ -327,11 +335,20 @@ Por último, vamos a ver otra forma de iterar, en este caso sobre los elementos 
 ```{r}
 vec <- c(1,2,3,4,5)
 
-for (i in vec){
+for (i in vec) {
     print(paste("i es ", i))
 }
 ```
 
+Otro modo alternativo de escribir los bucles for.  En este caso usamos `seq` que es un equvalente a `range` en Python, para recorrer el vector en sentido inverso
+
+```{r}
+vec2 <- c("uno", "dos", "tres")
+
+for (i in seq(length(vec2), 1 , -1)) {
+  print(paste("El valor de vec2 para", i, "es", vec2[i]))
+}
+```
 
 ## Funciones
 
@@ -351,7 +368,8 @@ Podemos hacer que las funciones devuelvan valores simplemente incluyendo una exp
 
 ```{r}
 suma_uno <- function(x) {
-  x + 1
+  result <- x + 1
+  result
 }
 ```
 
@@ -359,9 +377,19 @@ suma_uno <- function(x) {
 suma_uno(1)
 ```
 
+
 ```{r}
 inc = suma_uno(1)
 inc
+```
+
+
+```{r}
+suma_dos <- function(a, b) {
+  suma <- a + b
+  return(suma)
+}
+suma_dos(3,4)
 ```
 
 ## Factores
@@ -390,6 +418,20 @@ f[1]
 f[2]
 ```
 
+Podemos usar `levels` para crear un diccionario a partir de una variable categórica.
+
+```{r}
+
+dict_f <- levels(f)
+names(dict_f) <- c("A", "B", "C")
+
+print(dict_f)
+
+print(dict_f["B"])
+
+```
+
+
 Por último, R nos permite calcular una serie de valores estadísticos sobre la variable en cuestion con `summary`
 
 ```{r}
@@ -406,6 +448,21 @@ as.numeric(f)
 as.character(f)
 ```
 
+
+Podemos combinar esto último que hemos hecho para generar diccionarios de variables categóricas
+
+```{r create dictionary}
+
+get_dictionary <- function(list) {
+  labels <- levels(factor(list))
+  dict <- as.numeric(factor(labels))
+  names(dict) <- labels
+  
+  return(dict)
+}
+print(get_dictionary(c("Rojo", "Verde", "Azul")))
+print(get_dictionary(f))
+```
 
 ## DataFrames
 
@@ -504,6 +561,11 @@ R proporciona una serie de datos de prueba internamente a los que podemos accede
 
 
 ```{r}
+data() # Get available datasets
+?data # Get help about data()
+```
+
+```{r}
 data(mtcars)
 ```
 
@@ -539,7 +601,7 @@ summary(mtcars)
 Lo más habitual es leer datos desde un fichero para lo que podemos usar la función `read`, el formato de datos más común es CSV
 
 ```{r}
-df <- read.csv('datos/Titanic.csv')
+df <- read.csv('Titanic.csv')
 head(df)
 ```
 
