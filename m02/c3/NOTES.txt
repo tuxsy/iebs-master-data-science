@@ -1,0 +1,2 @@
+- check: https://robert-alvarez.github.io/2018-06-04-diagnostic_plots/
+
