@@ -1,11 +1,37 @@
 ---
 title: "Actividad Semanal de la clase 3"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+```{r, include=F}
+# Clear envrironment
+rm(list=ls())
+# Clear console and plots
+cat("\f")
+```
+
+```{r}
+# Definimos una función que nos permite mostrar correctamente las tablas cuando 
+#  exportamos a PDF
+
+knit_output <- length(knitr::current_input()) > 0
+
+gently_display <- function(df) {
+  if (knit_output) {
+    return(knitr::kable(df, "latex"))
+  } else {
+    return(df)
+  }
+}
+
+```
+
 
 # Dataset
 
@@ -20,14 +46,24 @@ En esta libreta vamos a trabajar con un conjunto de datos que contiene los datos
 
 Mediante esta libreta vamos a explorar los datos almacenados en estos tres ficheros y a responder preguntas haciendo operaciones y transformaciones con pandas. Además de completar las celdas de código para responder a los ejercicios, cuando así se indique se deberá incluir texto en _markdown_ explicando la información o las conclusiones extraídas.
 
-```{r}
+```{r, include=F}
 library(dplyr)
 library(tidyr)
+library(magrittr)  # Esto nos permite usar el operador %>&
 ```
+
+```{r}
+# Declaramos una función similar a como lo hacemos en Python con shape
+print_shape <- function(name, df) {
+  print(paste(name,":", nrow(df), "x", ncol(df)))
+}
+```
+
 
 ```{r}
 # Cargamos el conjunto de datos WorldCupMatches
 df_partidos <- read.csv("WorldCupMatches.csv")
+print_shape("df_partidos", df_partidos)
 ```
 
 ## 1. Exploración
@@ -36,7 +72,35 @@ Usar las funciones`head` y `summary` para explorar el dataframe `df_partidos`. *
 
 _No es necesario hacer una documentación exhaustiva, tan solo comentar aspectos principales como qué tipo de información almacena el DataFrame, cuántas filas y columnas tiene, y comentar las columnas que se consideren más relevantes._
 
-**Completar**
+```{r}
+# Mostramos las primeras filas. Limitamos el número de columnas 
+#  para mostrar la tabla en PDF
+
+gently_display(head(df_partidos)[1:7])
+```
+
+```{r}
+# Mostramos las columnas del dataframe
+glimpse(df_partidos)
+```
+
+```{r}
+summary(df_partidos)
+```
+
+### Descripción del dataset `df_partidos`
+
+El dataset `df_partidos` contiene información sobre `852` partidos jugados durante `20` copas del mundo jugadas entre los años `1930` y `2014`.
+
+El dataframe nos da tanto información *cuantitativa* como *cualitativa*. A modo de ejemplo:
+
+- **Información cuantitativa**:
+    - Goles marcados por el equipo local. En promedio se marcaron `2` goles por partido, siendo el máximo de goles marcados de `10` y el mínimo `0`
+    - Goles marcados por el equipo visitante. En promedio se marcaron `1` goles por partido, siendo el máximo de goles marcados de `7` y el mínimo `0`
+- **Información cualitativa**
+    - Ciudad en la que se jugó el partido. Siendo *Ciudad de México* la ciudad en la que más partidos se han jugado, con un total de `23`
+    - Estadio en el que se jugó el paritdo. Siendo el *Estadio Azteca* el que acumula un mayor número con `19`
+    - Equipo que jugó en casa, siendo la *Selección Nacional de Brasil* la que más veces ha jugado en casa con un total de `82` veces.
 
 
 ## 2. Limpieza de datos
@@ -45,26 +109,97 @@ Una de las cosas que llama la atención es la alta presencia de valores perdidos
 
 Localiza las filas con valores perdido. Analizar y **documentar en markdown** a qué se deben estos valores perdidos. Finalmente usar la función [drop_na](https://tidyr.tidyverse.org/reference/drop_na.html) sobre el DataFrame para eliminar los valores perdidos del DataFrame, y almacena el resultado en `df_partidos` de nuevo.
 
-**Completar**
+### ¿Cuantos valores perdidos contiene el DataFrame?
+
+```{r}
+
+## Mostramos los valores nulos por cada columna de modo equivalente a como 
+##  lo  hacemos con Python
+
+# Sustituimos las cadenas vacías por NA
+df_partidos <- na_if(df_partidos, "")
+
+# Declaramos una función que nos permitirá hacer el análisi como con Python
+
+is_null_sum <- function(df) {
+  nulls <- colSums(is.na(df_partidos))
+  print.data.frame(data.frame(nulls))
+}
+
+is_null_sum(df_partidos)
+
+```
+
+Aquí ya vemos un dato curioso, parece que haya filas que contienen todo nulos.
+
+A continuación analizamos las filas con valores nulos. Para ello usamos la función complete.cases() que nos dice qué filas están completas (sin nulos)
+
+```{r}
+# Limitamos el número de columnas Para mostrar la tabla en PDF
+gently_display(head(df_partidos[!complete.cases(df_partidos),c(1:2, 11,18:20)]))
+```
+
+```{r}
+# Limitamos el número de columnas Para mostrar la tabla en PDF
+gently_display(tail(df_partidos[!complete.cases(df_partidos),c(1:2, 11, 18:20)]))
+```
+
+Vamos a comrpobar si se corresponde con filas vacías al final del fichero
+
+```{bash}
+tail WorldCupMatches.csv
+```
+
+Efetivamente, hemos comprobado que el fichero contiene filas vacías al final. Probablemente esto se deba a un error durante la generación del CSV.
+
+### Eliminación de filas con valores perdidos
+
+Tal como hemos visto en el apartado anterior es seguro eliminar las filas que contiene valores, perdidos. Casi todos los valores peridos se deben a un error en la generación del CSV. 
+
+Sólo hay dos excepciones. Dos filas que contienen nulos en la columna `Attendance`. En esta ocasión se opta por eliminar dichas líneas, asumimos la pérdida de datos. Se deja también a modo de ejemplo cómo elininaríamos los nulos manteniendo esas dos filas 
+
+
+```{r}
+df_partidos <- drop_na(df_partidos)
+
+# Alternativa dejando las dos filas que contienen datos
+# df_partidos <- drop_na(df_partidos, Year)
+
+# Comprobamos si tenemso nulos tras la eliminación
+is_null_sum(df_partidos)
+```
+
 
 ## 3. Cargar datos
 
 Crear las variables `df_jugadores` y `df_copas` que contengan los dataframes correspondientes a la lectura de los csv `WorldCupPlayers` y `WorldCups`.
 
-**Completar**
+```{r}
+df_jugadores <- read.csv("WorldCupPlayers.csv")
+print_shape("df_jugadores", df_jugadores)
+df_copas <- read.csv("WorldCups.csv")
+print_shape("df_copas", df_copas)
+```
 
 
 ## 4. Rango temporal
 
 El dataframe `df_copas` contiene datos de todos los mundiales disputados. ¿Cuál es el año del mundial más antiguo disputado? ¿Y el año del mundial más reciente?
 
-**Pista:** recuerda que podemos usar funciones de agregación (`min` `mean`, etc.) directamente sobre columnas. Por ejemplo, el siguiente código nos muestra el mayor número de goles marcado en un mundial.
+
 
 ```{r}
-max(df_copas$Year)
+min_year <-min(df_copas$Year)
+print(paste("Mundial más antiguo:", min_year))
+
+max_year <- max(df_copas$Year)
+print(paste("Mundial más moderno:", max_year))
 ```
 
 **Opcional:** Una vez localizados los años de interés (más antiguo y más reciente) visualizar las filas completas correspondientes a cada año usando la función `filter`.
 
-**Completar**
+```{r}
+# Limitamos el número de columnas Para mostrar la tabla en PDF
+gently_display(df_copas %>% filter(Year==min_year | Year==max_year) %>% select(c(1:8)))
+```
 
