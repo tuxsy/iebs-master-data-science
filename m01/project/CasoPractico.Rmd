@@ -1,0 +1,239 @@
+---
+title: "CasoPractico"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Dataset
+
+En esta libreta vamos a trabajar con un conjunto de datos obtenido de [Kaggle](https://www.kaggle.com/abecklas/fifa-world-cup?select=WorldCupMatches.csv) que contiene los datos de la FIFA de la copa del mundo. Recomendamos acceder a este enlace para descargar los ficheros a trabajar, aunque también disponéis de los archivos ya descargados en la sección de recursos. Utilizaremos estos tres ficheros:
+
+- WorldCupMatches.csv: Datos de los partidos disputados
+- WorldCupPlayers.csv: Datos de los jugadores que han jugado en cada partido
+- WorldCups.csv: Datos de las copas disputadas y los resultados
+
+# Introducción
+
+Mediante esta libreta vamos a explorar los datos almacenados en estos tres ficheros y a responder preguntas haciendo operaciones y transformaciones con pandas. Además de completar las celdas de código para responder a los ejercicios, cuando así se indique se deberá incluir texto en _markdown_ explicando la información o las conclusiones extraídas.
+
+```{r}
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+# Cargamos el conjunto de datos WorldCupMatches
+df_partidos <- read.csv("WorldCupMatches.csv")
+```
+
+
+**NOTA:** en una actividad anterior completamos los ejercicios del 1 al 3, copiar y pegar dicho trabajo en esta libreta con el fin de tener un report completo que analize los datos del problema. Es decir, **no es necesario volver a realizar estos 3 primeros ejercicios**.
+
+
+## 1. Exploración
+
+Usar las funciones`head` y `summary` para explorar el dataframe `df_partidos`. **Documentar en markdown** brevemente la información almacenada en cada dataframe (columnas y tipo de datos).
+
+_No es necesario hacer una documentación exhaustiva, tan solo comentar aspectos principales como qué tipo de información almacena el DataFrame, cuántas filas y columnas tiene, y comentar las columnas que se consideren más relevantes._
+
+**Copiar solución de la actividad semanal correspondiente**
+
+
+## 2. Limpieza de datos
+
+Una de las cosas que llama la atención es la alta presencia de valores perdidos en el DataFrame `df_partidos`. Cuando trabajamos con datos obtenidos del mundo real siempre nos toparemos con problemas relacionados con la medición, captura o almacenamiento de dicha información.
+
+Localiza las filas con valores perdido. Analizar y **documentar en markdown** a qué se deben estos valores perdidos. Finalmente usar la función [drop_na](https://tidyr.tidyverse.org/reference/drop_na.html) sobre el DataFrame para eliminar los valores perdidos del DataFrame, y almacena el resultado en `df_partidos` de nuevo.
+
+**Copiar solución de la actividad semanal correspondiente**
+
+
+## 3. Cargar datos
+
+Crear las variables `df_jugadores` y `df_copas` que contengan los dataframes correspondientes a la lectura de los csv `WorldCupPlayers` y `WorldCups`.
+
+**Copiar solución de la actividad semanal correspondiente**
+
+
+## 4. Rango temporal
+
+El dataframe `df_copas` contiene datos de todos los mundiales disputados. ¿Cuál es el año del mundial más antiguo disputado? ¿Y el año del mundial más reciente?
+
+**Pista:** recuerda que podemos usar funciones de agregación (`min` `mean`, etc.) directamente sobre columnas. Por ejemplo, el siguiente código nos muestra el mayor número de goles marcado en un mundial.
+
+```{r}
+max(df_copas$Year)
+```
+
+
+**Opcional:** Una vez localizados los años de interés (más antiguo y más reciente) visualizar las filas completas correspondientes a cada año usando la función `filter`.
+
+**Completar**
+
+
+---
+
+# Ejercicios a realizar
+
+Los ejercicios a continuación amplian el reporte comenzado en una actividad semanal anterior. Algunos de ellos son más complejos y son opcionales, pero se recomienda que al menos se intente resolverlos pues puntuará positivamente.
+
+
+---
+
+
+## 5. Asistencia de público
+
+La columna `Attendance` indica la asistencia de público en cada mundial. Pandas ha cargado esta columna como tipo string, ya que los valores indicados contienen puntos como separador de millares. En primer lugar vamos a transformar esta columna para que no contenga el caracter `.`. Posteriormente transformaremos esta columna a formato numérico usando la función `as.numeric`.
+
+```{r}
+df_copas$Attendance <- as.numeric(gsub(".", "", df_copas$Attendance, fixed = TRUE))
+```
+
+Teniendo en cuenta todos los datos de `df_copas`, ¿Cuál fué la mayor asistencia de un mundial? ¿Cuál es la asistencia media?
+
+
+**Completar**
+
+## 6. Asistencia de público en función del país
+
+Sabemos que, dependiendo del país donde se celebre la copa del mundo, ésta tiene un mayor o menor impacto o relevancia. Vamos a calcular la media de asistencia agrupando por país. Finalmente, ordenar los resultados por orden decreciente de este número medio de asistentes.
+
+**Pista 1:** Como se muestra en el siguiente ejemplo, recuerda que podemos combinar la función [group_by](https://dplyr.tidyverse.org/reference/group_by.html) con otras funciones de agregación como `mean`.
+
+```{r}
+df_personas <- data.frame(name=c("Juan", "Laura", "José", "Rosa"), gender=c("male", "female", "male", "female"), age=c(56, 23, 46, 26))
+
+# edad media de todas las personas
+edad_media = mean(df_personas$age)
+print(paste("La edad media de todas las personas es de", edad_media))
+
+```
+
+```{r}
+# edad media agrupando por género
+edad_media_por_genero <- df_personas %>% group_by(gender) %>% summarize(age=mean(age))
+# La edad media agrupada por género es
+edad_media_por_genero
+
+```
+
+**Pista 2:** Recuerda que podemos usar la función [arrange](https://dplyr.tidyverse.org/reference/arrange.html) para ordenar un DataFrame por una de sus columnas. Por ejemplo, el siguiente código muestra los mundiales ordenados de forma decreciente por el número de goles marcados:
+
+```{r}
+df_copas %>%
+  arrange(-GoalsScored) %>%
+  head()
+```
+
+**Completar**
+
+
+
+## 7. País con más victorias
+
+Vamos a analizar el número de veces que un país ha ganado la copa del mundo. Transformar el DataFrame `df_copas` para que muestre los diferentes países que han ganado al menos una copa del mundo, y ordena el DataFrame por dicho número de forma descendente usando la función [arrange](https://dplyr.tidyverse.org/reference/arrange.html).
+
+¿Ves algo extraño o digno de comentar? Pista: analiza Alemania. **Hazlo en texto markdown.**
+
+**Completar**
+
+---
+# Parte opcional
+
+Los ejercicios anteriores son obligatorios y puntuan hasta un máximo de 80 puntos sobre 100.
+
+Los siguientes ejercicios trabajan con los dataframes cargados para extraer información concreta a partir de los datos. 
+Estos ejercicios son opcionales, pero es recomendable intentar resolverlos para adquirir habilidades.
+
+---
+
+## Creación de un nuevo DataFrame
+
+A continuación vamos a trabajar con el DataFrame `df_partidos`. Vamos a centrarnos en los enfrentamientos de los equipos, siendo indiferente si el equipo juega en casa o fuera. En este sentido, la información disponible no es la mejor para trabajar cómodamente. Por ello, es habitual relaizar transformaciones a los datos en función de las preguntas que le queramos hacer. A continuación crearemos un nuevo DataFrame llamado `df_paises`que contendrá todos los paises involucrados en la copa del mundo y el año en el que participaron. Es decir, un país que haya jugado varias copas del mundo aparecerá varias veces:
+
+
+||Year|Country|
+|---|---|---|
+|0|1930|France|
+|1|1930|USA|
+|...|...|..|
+|37|1938|France|
+|...|...|..|
+
+**Nota:** este problema se puede afrontar generando dos dataframes, uno donde la columna `Country` se corresponde con `Home Team Name`, y otro donde la columna `Country` se corresponde con `Away Team Name`. Finalmente, combinar ambos DataFrames en uno solo. Para ello, la función [rename](https://dplyr.tidyverse.org/reference/rename.html) nos permite renombrar columnas, y la función [bind_rows](https://dplyr.tidyverse.org/reference/bind.html)
+permite combinar varios DataFrames en uno solo, juntando las filas de ambos.
+
+```{r}
+df_paises <- bind_rows(
+  df_partidos %>% 
+    select(Year, Home.Team.Name) %>%
+    rename(Country=Home.Team.Name),
+  df_partidos %>% 
+    select(Year, Away.Team.Name) %>%
+    rename(Country=Away.Team.Name)
+)
+
+```
+
+## 8. Número de países
+
+Vamos a descubrir cuántos países han participado, al menos una vez, en una copa del mundo. Para ello vamos a trabajar con el DataFrame construido anteriormente y a usar la columna Country (que es de tipo factor).
+
+**Completar**
+
+
+## 9. Número de partidos por país
+
+Ahora vamos a descubrir cuántos partidos ha jugado cada país. Operar con el DataFrame para que muestre un país por fila y una columna que indique el número de partidos que ha jugado. Ordenar el DataFrame por dicha columna de forma descendente. Recuerda que la fución [n()](https://dplyr.tidyverse.org/reference/n.html) nos permite contar el número de elementos en una agrupación.
+
+**Completar**
+
+## 10. Partidos jugados por España
+
+Vamos a trabajar a continuación con el DataFrame `df_partidos`. Seleccionar aquellos partidos (filas del dataframe) en los que España ha jugado como `Home Team`, es decir, donde la columna `Home Team` tiene el valor `España`. Recuerda que para la operación de filtrado hay que usar la función [filter](https://dplyr.tidyverse.org/reference/filter.html).
+
+A continuación, haz una nueva selección en los que España ha jugado como `Away Team`, es decir, donde la columna `Away Team` tiene el valor `España`.
+
+**Opcional:** ¿Podrías hacer una sola selección donde España haya jugado como `Home Team` o como `Away Team`?. Pista: consulta la documentación del operador de [disyunción](https://dplyr.tidyverse.org/reference/filter.html#useful-filter-functions).
+
+**Completar**
+
+## Calcular el vencedor de cada partido
+
+El DataFrame `df_partidos` tiene la información de cada partido, incluyendo los goles marcados por cada equipo, pero no disponemos de una columna que indique si un equipo ganó o perdió. Vamos a crear una columna llamada `Ganador` que indique el nombre del equipo vencedor (con más goles). También podemos encontrar empates, en cuyo caso usaremos `NA` para indicar que desconocemos el vencedor de dicho partido.
+
+**Nota:** Para realizar una asignación condicional utilizaremos la función [ifelse](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse).
+
+```{r}
+df_partidos <- df_partidos %>%
+  mutate(
+    Ganador=ifelse(Home.Team.Goals>Away.Team.Goals, as.character(Home.Team.Name),
+                   ifelse(Home.Team.Goals<Away.Team.Goals, as.character(Away.Team.Name), NA))
+  )
+  
+```
+
+
+
+## 11. Número de victorias por país
+
+Calcular para cada país el número de partidos ganados. Para ello, usar la función `drop_na`  para eliminar las filas correspondientes a partidos donde la columna `Ganador` es `NA`. Ordenar los países por número de victorias de forma descendente.
+
+**Completar**
+
+
+## Opcional 1
+
+Calcular para cada país el ratio de victorias, calculado como el número de partidos ganados dividido por el número de partidos jugados. Ordenar los países por ratio de forma descendente.
+
+**Pista:** Si obtenemos dos dataframes, uno con las victorias por cada país y otro con el número total de partidos jugados, podemos utilizar la función [inner_join](https://dplyr.tidyverse.org/reference/mutate-joins.html) para combinar ambos en un solo DataFrame, y despues crear una nueva columna que sea el ratio.
+
+
+**Completar**
+
+## Opcional 2
+
+¿Se te ocurre alguna pregunta adicional que hacerle a los datos? Utiliza una celda de tipo markdown para documentarla y otra de código para implementarla y ver así la respuesta.
